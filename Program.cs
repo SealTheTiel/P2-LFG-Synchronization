@@ -3,8 +3,7 @@ using P2;
 
 Console.WriteLine("Hello, World!");
 PartyManager pm = PartyManager.Instance;
-for (ulong i = 0; i < 5000; i++) {
-    pm.NewParty();
-}
 
-Console.WriteLine(pm.PartyCount() + " Parties");
+pm.SetParameters(1, 30, 10, 10, 1, 1);
+pm.Initialize();
+while (pm.running) { }
