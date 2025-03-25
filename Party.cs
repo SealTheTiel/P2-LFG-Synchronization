@@ -85,7 +85,15 @@ namespace P2 {
             }
         }
 
-        public uint PartyCount() {  return partyCount; }
+        public void SetParameters(uint maxParty, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime) {
+            this.maxParty = maxParty;
+            this.dpsCount = dpsCount;
+            this.healerCount = healerCount;
+            this.tankCount = tankCount;
+            this.minTime = minTime;
+            this.maxTime = maxTime;
+
+            if (this.minTime > this.maxTime) { this.minTime = this.maxTime; }
 
         public Party? GetParty(uint id) {
             foreach (KeyValuePair<uint, Party> party in partyList) {
