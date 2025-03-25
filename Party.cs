@@ -43,7 +43,7 @@ namespace P2 {
         private readonly ConcurrentQueue<Party> freePartyQueue = new();
         private readonly ConcurrentDictionary<uint, Party> fullPartyList = new();
 
-        private Dictionary<uint, Party> partyList = new Dictionary<uint, Party>();
+
         private uint partyCount = 0;
         private SemaphoreSlim partySemaphore;
         
