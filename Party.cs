@@ -43,6 +43,17 @@ namespace P2 {
 
         private Dictionary<uint, Party> partyList = new Dictionary<uint, Party>();
         private uint partyCount = 0;
+        private SemaphoreSlim partySemaphore;
+        
+        private uint maxParty;
+        private uint dpsCount;
+        private uint healerCount;
+        private uint tankCount;
+        private uint maxTime;
+        private uint minTime;
+        
+        public Random random = new Random();
+        public bool running = true;
         private PartyManager() { }
 
         public static PartyManager Instance {
