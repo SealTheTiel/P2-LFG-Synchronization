@@ -71,9 +71,18 @@ namespace P2 {
 
         public void NewParty() {
             uint id = partyCount++;
-            Party party = new Party(id);
-            partyList.Add(id, party);
-            return party;
+            Party party = new(id, minTime, maxTime);
+            freePartyQueue.Enqueue(party);
+        }
+
+        public void NotifyPartyStart(Party party) {
+            fullPartyList.TryAdd(party.GetId(), party);
+        }
+
+        public void NotifyPartyEnd(Party party) {
+            if (fullPartyList.TryRemove(party.GetId(), out _)) {
+                freePartyQueue.Enqueue(party);
+            }
         }
 
         public uint PartyCount() {  return partyCount; }
