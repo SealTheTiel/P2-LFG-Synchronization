@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace P2 {
@@ -17,27 +17,25 @@ namespace P2 {
             this.maxTime = maxTime;
         }
 
-        public bool addCharacter(string type) {
-            if (dps + healer + tank == 5) {
-                return false;
-            }
-            if (type == "Damage" && dps < 3) {
-                dps++;
-            }
-            else if (type == "Healer" && healer < 1) {
-                healer++;
-            }
-            else if (type == "Tank" && tank < 1) {
-                tank++;
-            }
-            return true;
+        public async Task StartPartyAsync(SemaphoreSlim semaphore) {
+            PartyManager PM = PartyManager.Instance;
+            timeLimit = (uint)PM.random.Next((int)minTime, (int)maxTime);
+
+            PM.NotifyPartyStart(this);
+            Console.WriteLine($"Party {id} has started with a time limit of {timeLimit} seconds.");
+
+            await Task.Delay((int)timeLimit * 1000);
+
+            Console.WriteLine($"Party {id} has finished.");
+            PM.NotifyPartyEnd(this);
+
+            semaphore.Release();
         }
 
         public uint GetId() => id;
     }
 
     class PartyManager {
-        //singleton that houses all parties
         private static PartyManager? _instance;
         private static readonly object _lock = new();
         private readonly ConcurrentQueue<Party> freePartyQueue = new();
@@ -96,12 +94,12 @@ namespace P2 {
             if (this.minTime > this.maxTime) { this.minTime = this.maxTime; }
 
             this.partySemaphore = new SemaphoreSlim((int) maxParty);
-            }
+        }
         public void Initialize() {
             for (uint i = 0; i < maxParty; i++) { // Pre-generate some parties
                 NewParty();
-        }
-        
+            }
+
             Task.Run(async () => {
                 while (true) {
                     await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
@@ -122,7 +120,7 @@ namespace P2 {
                             partySemaphore.Release(); // If no parties are available, release the lock
                         }
                     }
-            }
+                }
             });
         }
     }
