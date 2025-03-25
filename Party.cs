@@ -97,7 +97,9 @@ namespace P2 {
 
             this.partySemaphore = new SemaphoreSlim((int) maxParty);
             }
-            return null;
+        public void Initialize() {
+            for (uint i = 0; i < maxParty; i++) { // Pre-generate some parties
+                NewParty();
         }
         
             Task.Run(async () => {
