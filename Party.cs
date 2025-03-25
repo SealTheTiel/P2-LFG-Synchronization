@@ -33,10 +33,7 @@ namespace P2 {
             return true;
         }
 
-        public uint getId() { return id; }
-        public int getDps() { return dps; }
-        public int getHealer() { return healer; }
-        public int getTank() { return tank; }
+        public uint GetId() => id;
     }
 
     class PartyManager {
