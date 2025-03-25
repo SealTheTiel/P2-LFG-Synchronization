@@ -39,7 +39,9 @@ namespace P2 {
     class PartyManager {
         //singleton that houses all parties
         private static PartyManager? _instance;
-        private static readonly object _lock = new object();
+        private static readonly object _lock = new();
+        private readonly ConcurrentQueue<Party> freePartyQueue = new();
+        private readonly ConcurrentDictionary<uint, Party> fullPartyList = new();
 
         private Dictionary<uint, Party> partyList = new Dictionary<uint, Party>();
         private uint partyCount = 0;
