@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace P2 {
     class Party {
-        private uint id;
-        private int dps = 0;
-        private int healer = 0;
-        private int tank = 0;
+        private readonly uint id;
+        private uint timeLimit;
+        private readonly uint minTime;
+        private readonly uint maxTime;
 
         public Party(uint id) => this.id = id;
 
