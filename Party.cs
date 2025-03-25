@@ -11,7 +11,11 @@ namespace P2 {
         private readonly uint minTime;
         private readonly uint maxTime;
 
-        public Party(uint id) => this.id = id;
+        public Party(uint id, uint minTime, uint maxTime) {
+            this.id = id;
+            this.minTime = minTime;
+            this.maxTime = maxTime;
+        }
 
         public bool addCharacter(string type) {
             if (dps + healer + tank == 5) {
