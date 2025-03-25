@@ -69,7 +69,7 @@ namespace P2 {
             }
         }
 
-        public Party NewParty() {
+        public void NewParty() {
             uint id = partyCount++;
             Party party = new Party(id);
             partyList.Add(id, party);
