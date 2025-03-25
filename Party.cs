@@ -95,20 +95,31 @@ namespace P2 {
 
             if (this.minTime > this.maxTime) { this.minTime = this.maxTime; }
 
-        public Party? GetParty(uint id) {
-            foreach (KeyValuePair<uint, Party> party in partyList) {
-                if (party.Value.getId() == id) { return party.Value; }
+            this.partySemaphore = new SemaphoreSlim((int) maxParty);
             }
             return null;
         }
         
-        public void PrintParties() {
-            foreach (KeyValuePair<uint, Party> party in partyList) {
-                Console.WriteLine("Party " + party.Value.getId());
-                Console.WriteLine("\tDPS: " + party.Value.getDps());
-                Console.WriteLine("\tHealer: " + party.Value.getHealer());
-                Console.WriteLine("\tTank: " + party.Value.getTank());
-                Console.WriteLine("");
+            Task.Run(async () => {
+                while (true) {
+                    await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
+
+                    lock (_lock) {
+                        if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
+                            Console.WriteLine("Not enough members to start a new party. Exiting...");
+                            running = false;
+                            return;
+                        }
+                        if (freePartyQueue.TryDequeue(out Party? party)) {
+                            dpsCount -= 3;
+                            healerCount--;
+                            tankCount--;
+                            Task.Run(async () => await party.StartPartyAsync(partySemaphore));
+                        }
+                        else {
+                            partySemaphore.Release(); // If no parties are available, release the lock
+                        }
+                    }
             }
         }
     }
