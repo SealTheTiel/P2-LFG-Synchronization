@@ -46,8 +46,6 @@ namespace P2 {
     class PartyManager {
         private static PartyManager? _instance;
         private static readonly object _lock = new();
-        private readonly ConcurrentQueue<GameInstance> freePartyQueue = new();
-        private readonly ConcurrentDictionary<uint, GameInstance> fullPartyList = new();
         private readonly List<GameInstance> partyList = new();
         private uint partyCount = 0;
         private SemaphoreSlim partySemaphore;
@@ -76,13 +74,9 @@ namespace P2 {
             uint id = partyCount++;
             GameInstance party = new(id, minTime, maxTime);
             partyList.Add(party);
-            freePartyQueue.Enqueue(party);
         }
         public void NotifyPartyEnd(GameInstance party) {
-            if (fullPartyList.TryRemove(party.GetId(), out _)) {
-                freePartyQueue.Enqueue(party);
-                Logger.Log("Party " + party.GetId() + " has ended.", partyList);
-            }
+            Logger.Log("Party " + party.GetId() + " has ended.", partyList);
         }
 
         public void SetParameters(uint maxInstances, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime) {
@@ -110,20 +104,20 @@ namespace P2 {
                         if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
                             break;
                         }
-                        if (freePartyQueue.TryDequeue(out GameInstance? party)) {
+                        GameInstance? party = partyList.FirstOrDefault(p => p.GetStatus() == Status.EMPTY);
+                        if (party != null) {
                             dpsCount -= 3;
                             healerCount--;
                             tankCount--;
                             Task runParty = party.StartInstanceAsync(partySemaphore);
                             Logger.Log("Party " + party.GetId() + " has started.", partyList);
-                            fullPartyList.TryAdd(party.GetId(), party);
                         }
                         else {
                             partySemaphore.Release(); // If no parties are available, release the lock
                         }
                     }
                 }
-                while (fullPartyList.Count > 0) { }
+                while (partyList.FirstOrDefault(p => p.GetStatus() == Status.ACTIVE) != null) { }
                 Logger.LogEnd("All parties have ended.", partyList);
                 running = false;
             });
