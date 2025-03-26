@@ -6,9 +6,10 @@
                 Console.Write(prompt);
                 string input = Console.ReadLine();
 
-                if (uint.TryParse(input, out result) && (result > 0 || allowZero)) { break; }
-
-                Console.WriteLine("Invalid input. Please enter a number between 1 and " + uint.MaxValue + ".\n");
+                if (uint.TryParse(input, out result) && (result < int.MaxValue) && (result > 0 || allowZero)) { break; }
+                int minimum = 1;
+                if (allowZero) { minimum = 0; }
+                Console.WriteLine($"Invalid input. Please enter a number between {minimum} and {int.MaxValue}.\n");
                 Console.WriteLine("--------------------------------------------------");
             }
             Console.WriteLine("--------------------------------------------------");
@@ -24,7 +25,7 @@
 
             if (minTime > maxTime) {
                 maxTime = minTime;
-                Console.WriteLine("Maximum time set to minimum time");
+                Console.WriteLine("[INFO] Maximum time has been set to the minimum time");
             }
 
             PartyManager pm = PartyManager.Instance;
