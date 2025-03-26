@@ -99,9 +99,6 @@ namespace P2 {
                     await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
 
                     lock (_lock) {
-                        //Console.WriteLine($"dpsCount: {dpsCount}\tdpsCount < 3: {dpsCount < 3}");
-                        //Console.WriteLine($"healerCount: {healerCount}\thealerCount < 1: {healerCount < 1}");
-                        //Console.WriteLine($"tankCount: {tankCount}\ttankCount < 1: {tankCount < 1}");
                         if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
                             break;
                         }
@@ -117,7 +114,7 @@ namespace P2 {
                         }
                     }
                 }
-                while (fullPartyList.Count > 0) { } // Wait for all parties to 
+                while (fullPartyList.Count > 0) { }
                 running = false;
             });
         }
