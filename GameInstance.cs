@@ -117,8 +117,7 @@ namespace P2 {
                         }
                     }
                 }
-                while (fullPartyList.Count > 0) { } // Wait for all parties to finish
-                Console.WriteLine("Not enough players for a party.");
+                while (fullPartyList.Count > 0) { } // Wait for all parties to 
                 running = false;
             });
         }
