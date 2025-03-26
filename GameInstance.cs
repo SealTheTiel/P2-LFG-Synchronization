@@ -5,6 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace P2 {
+    enum Status {
+        ACTIVE,
+        EMP
+    }
     class GameInstance {
         private readonly uint id;
         private uint timeLimit;
@@ -39,7 +43,6 @@ namespace P2 {
         private static readonly object _lock = new();
         private readonly ConcurrentQueue<GameInstance> freePartyQueue = new();
         private readonly ConcurrentDictionary<uint, GameInstance> fullPartyList = new();
-
 
         private uint partyCount = 0;
         private SemaphoreSlim partySemaphore;
