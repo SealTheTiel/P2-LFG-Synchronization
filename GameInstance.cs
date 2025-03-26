@@ -58,9 +58,7 @@ namespace P2 {
         public static PartyManager Instance {
             get {
                 lock (_lock) {
-                    if (_instance == null) {
-                        _instance = new PartyManager();
-                    }
+                    if (_instance == null) { _instance = new PartyManager(); }
                     return _instance;
                 }
             }
