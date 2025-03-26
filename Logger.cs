@@ -24,7 +24,7 @@ namespace P2 {
             Console.Write(PreciseTime.TimeStamp() + update);
             foreach (GameInstance instance in instances) {
                 Console.Write("\n");
-                Console.Write($"\t\t\t\t{instance.GetId()}");
+                Console.Write($"\t\t\t\tInstance {instance.GetId()}: {instance.GetStatus()}");
             }
             Console.Write("\n");
         }
