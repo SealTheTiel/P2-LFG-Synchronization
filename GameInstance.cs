@@ -14,7 +14,7 @@ namespace P2 {
         private uint timeLimit;
         private readonly uint minTime;
         private readonly uint maxTime;
-        public Status status = Status.EMPTY;
+        private Status status = Status.EMPTY;
 
         public GameInstance(uint id, uint minTime, uint maxTime) {
             this.id = id;
@@ -39,6 +39,7 @@ namespace P2 {
         }
 
         public uint GetId() => id;
+        public Status GetStatus() => status;
     }
 
     class PartyManager {
