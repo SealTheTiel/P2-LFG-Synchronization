@@ -5,23 +5,22 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace P2 {
-    class Party {
+    class GameInstance {
         private readonly uint id;
         private uint timeLimit;
         private readonly uint minTime;
         private readonly uint maxTime;
 
-        public Party(uint id, uint minTime, uint maxTime) {
+        public GameInstance(uint id, uint minTime, uint maxTime) {
             this.id = id;
             this.minTime = minTime;
             this.maxTime = maxTime;
         }
 
-        public async Task StartPartyAsync(SemaphoreSlim semaphore) {
+        public async Task StartInstanceAsync(SemaphoreSlim semaphore) {
             PartyManager PM = PartyManager.Instance;
             timeLimit = (uint)PM.random.Next((int)minTime, (int)maxTime);
 
-            PM.NotifyPartyStart(this);
             Console.WriteLine($"Party {id} has started with a time limit of {timeLimit} seconds.");
 
             await Task.Delay((int)timeLimit * 1000);
@@ -38,14 +37,14 @@ namespace P2 {
     class PartyManager {
         private static PartyManager? _instance;
         private static readonly object _lock = new();
-        private readonly ConcurrentQueue<Party> freePartyQueue = new();
-        private readonly ConcurrentDictionary<uint, Party> fullPartyList = new();
+        private readonly ConcurrentQueue<GameInstance> freePartyQueue = new();
+        private readonly ConcurrentDictionary<uint, GameInstance> fullPartyList = new();
 
 
         private uint partyCount = 0;
         private SemaphoreSlim partySemaphore;
         
-        private uint maxParty;
+        private uint maxInstances;
         private uint dpsCount;
         private uint healerCount;
         private uint tankCount;
@@ -69,22 +68,17 @@ namespace P2 {
 
         public void NewParty() {
             uint id = partyCount++;
-            Party party = new(id, minTime, maxTime);
+            GameInstance party = new(id, minTime, maxTime);
             freePartyQueue.Enqueue(party);
         }
-
-        public void NotifyPartyStart(Party party) {
-            fullPartyList.TryAdd(party.GetId(), party);
-        }
-
-        public void NotifyPartyEnd(Party party) {
+        public void NotifyPartyEnd(GameInstance party) {
             if (fullPartyList.TryRemove(party.GetId(), out _)) {
                 freePartyQueue.Enqueue(party);
             }
         }
 
-        public void SetParameters(uint maxParty, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime) {
-            this.maxParty = maxParty;
+        public void SetParameters(uint maxInstances, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime) {
+            this.maxInstances = maxInstances;
             this.dpsCount = dpsCount;
             this.healerCount = healerCount;
             this.tankCount = tankCount;
@@ -93,10 +87,10 @@ namespace P2 {
 
             if (this.minTime > this.maxTime) { this.minTime = this.maxTime; }
 
-            this.partySemaphore = new SemaphoreSlim((int) maxParty);
+            this.partySemaphore = new SemaphoreSlim((int) maxInstances);
         }
         public void Initialize() {
-            for (uint i = 0; i < maxParty; i++) { // Pre-generate some parties
+            for (uint i = 0; i < maxInstances; i++) { // Pre-generate some parties
                 NewParty();
             }
 
@@ -105,22 +99,27 @@ namespace P2 {
                     await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
 
                     lock (_lock) {
+                        //Console.WriteLine($"dpsCount: {dpsCount}\tdpsCount < 3: {dpsCount < 3}");
+                        //Console.WriteLine($"healerCount: {healerCount}\thealerCount < 1: {healerCount < 1}");
+                        //Console.WriteLine($"tankCount: {tankCount}\ttankCount < 1: {tankCount < 1}");
                         if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
-                            Console.WriteLine("Not enough members to start a new party. Exiting...");
-                            running = false;
-                            return;
+                            break;
                         }
-                        if (freePartyQueue.TryDequeue(out Party? party)) {
+                        if (freePartyQueue.TryDequeue(out GameInstance? party)) {
                             dpsCount -= 3;
                             healerCount--;
                             tankCount--;
-                            Task.Run(async () => await party.StartPartyAsync(partySemaphore));
+                            Task runParty = party.StartInstanceAsync(partySemaphore);
+                            fullPartyList.TryAdd(party.GetId(), party);
                         }
                         else {
                             partySemaphore.Release(); // If no parties are available, release the lock
                         }
                     }
                 }
+                while (fullPartyList.Count > 0) { } // Wait for all parties to finish
+                Console.WriteLine("Not enough players for a party.");
+                running = false;
             });
         }
     }
