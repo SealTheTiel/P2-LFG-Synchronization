@@ -31,6 +31,7 @@
             pm.SetParameters(maxInstances, dpsCount, healerCount, tankCount, minTime, maxTime);
             pm.Initialize();
             while (pm.running) { }
+            Task.Delay(1000).Wait();
             Console.WriteLine("Program Finished");
         }
     }

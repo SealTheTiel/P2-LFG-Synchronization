@@ -19,14 +19,24 @@ namespace P2 {
         }
     }
     class Logger {
-        public Logger() { }
-        public void Log(string update, List<GameInstance> instances) {
-            Console.Write(PreciseTime.TimeStamp() + update);
+        public static void Log(string update, List<GameInstance> instances) {
+            StringBuilder sb = new();
+            sb.Append($"{PreciseTime.TimeStamp()}{update}\n\t\t\t\t\tInstances:");
             foreach (GameInstance instance in instances) {
-                Console.Write("\n");
-                Console.Write($"\t\t\t\tInstance {instance.GetId()}: {instance.GetStatus()}");
+                sb.Append("\n");
+                sb.Append($"\t\t\t\t\tInstance {instance.GetId()}: {instance.GetStatus()}");
             }
-            Console.Write("\n");
+            Console.WriteLine(sb.ToString());
+        }
+
+        public static void LogEnd(string update, List<GameInstance> instances) {
+            StringBuilder sb = new();
+            sb.Append($"{PreciseTime.TimeStamp()}{update}\n\t\t\t\t\tInstances:");
+            foreach (GameInstance instance in instances) {
+                sb.Append("\n");
+                sb.Append($"\t\t\t\t\tInstance {instance.GetId()}: Hosted {instance.GetPartiesRan()} parties for a total of {instance.GetTotalPartyTime()} seconds.");
+            }
+            Console.WriteLine(sb.ToString());
         }
     }
 }

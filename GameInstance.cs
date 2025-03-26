@@ -14,6 +14,8 @@ namespace P2 {
         private uint timeLimit;
         private readonly uint minTime;
         private readonly uint maxTime;
+        private uint partiesRan;
+        private ulong totalPartyTime;
         private Status status = Status.EMPTY;
 
         public GameInstance(uint id, uint minTime, uint maxTime) {
@@ -26,20 +28,19 @@ namespace P2 {
             status = Status.ACTIVE;
             PartyManager PM = PartyManager.Instance;
             timeLimit = (uint)PM.random.Next((int)minTime, (int)maxTime);
-
-            Console.WriteLine($"Party {id} has started with a time limit of {timeLimit} seconds.");
-
+            partiesRan++;
             await Task.Delay((int)timeLimit * 1000);
-
-            Console.WriteLine($"Party {id} has finished.");
+            totalPartyTime += timeLimit;
+            status = Status.EMPTY;
             PM.NotifyPartyEnd(this);
 
-            status = Status.ACTIVE;
             semaphore.Release();
         }
 
         public uint GetId() => id;
         public Status GetStatus() => status;
+        public uint GetPartiesRan() => partiesRan;
+        public ulong GetTotalPartyTime() => totalPartyTime;
     }
 
     class PartyManager {
@@ -47,7 +48,7 @@ namespace P2 {
         private static readonly object _lock = new();
         private readonly ConcurrentQueue<GameInstance> freePartyQueue = new();
         private readonly ConcurrentDictionary<uint, GameInstance> fullPartyList = new();
-
+        private readonly List<GameInstance> partyList = new();
         private uint partyCount = 0;
         private SemaphoreSlim partySemaphore;
         
@@ -74,11 +75,13 @@ namespace P2 {
         public void NewParty() {
             uint id = partyCount++;
             GameInstance party = new(id, minTime, maxTime);
+            partyList.Add(party);
             freePartyQueue.Enqueue(party);
         }
         public void NotifyPartyEnd(GameInstance party) {
             if (fullPartyList.TryRemove(party.GetId(), out _)) {
                 freePartyQueue.Enqueue(party);
+                Logger.Log("Party " + party.GetId() + " has ended.", partyList);
             }
         }
 
@@ -112,6 +115,7 @@ namespace P2 {
                             healerCount--;
                             tankCount--;
                             Task runParty = party.StartInstanceAsync(partySemaphore);
+                            Logger.Log("Party " + party.GetId() + " has started.", partyList);
                             fullPartyList.TryAdd(party.GetId(), party);
                         }
                         else {
@@ -120,6 +124,7 @@ namespace P2 {
                     }
                 }
                 while (fullPartyList.Count > 0) { }
+                Logger.LogEnd("All parties have ended.", partyList);
                 running = false;
             });
         }
