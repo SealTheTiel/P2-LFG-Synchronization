@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 namespace P2 {
     enum Status {
         ACTIVE,
-        EMP
+        EMPTY
     }
     class GameInstance {
         private readonly uint id;
         private uint timeLimit;
         private readonly uint minTime;
         private readonly uint maxTime;
+        public Status status = Status.EMPTY;
 
         public GameInstance(uint id, uint minTime, uint maxTime) {
             this.id = id;
@@ -22,6 +23,7 @@ namespace P2 {
         }
 
         public async Task StartInstanceAsync(SemaphoreSlim semaphore) {
+            status = Status.ACTIVE;
             PartyManager PM = PartyManager.Instance;
             timeLimit = (uint)PM.random.Next((int)minTime, (int)maxTime);
 
@@ -32,6 +34,7 @@ namespace P2 {
             Console.WriteLine($"Party {id} has finished.");
             PM.NotifyPartyEnd(this);
 
+            status = Status.ACTIVE;
             semaphore.Release();
         }
 
