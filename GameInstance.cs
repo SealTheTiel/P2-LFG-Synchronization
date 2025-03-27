@@ -24,17 +24,16 @@ namespace P2 {
             this.maxTime = maxTime;
         }
 
-        public async Task StartInstanceAsync(SemaphoreSlim semaphore) {
+        public async Task StartInstanceAsync() {
             status = Status.ACTIVE;
             PartyManager PM = PartyManager.Instance;
-            timeLimit = (uint)PM.random.Next((int)minTime, (int)maxTime);
+            PM.NotifyPartyStart(this);
+            timeLimit = (uint)PM.random.Next((int)minTime, (int)maxTime + 1);
             partiesRan++;
             await Task.Delay((int)timeLimit * 1000);
             totalPartyTime += timeLimit;
             status = Status.EMPTY;
             PM.NotifyPartyEnd(this);
-
-            semaphore.Release();
         }
 
         public uint GetId() => id;
@@ -48,7 +47,8 @@ namespace P2 {
         private static readonly object _lock = new();
         private readonly List<GameInstance> partyList = new();
         private uint partyCount = 0;
-        private SemaphoreSlim partySemaphore;
+        private bool logToFile = false;
+        private bool verboseLog = true;
         
         private uint maxInstances;
         private uint dpsCount;
@@ -75,11 +75,17 @@ namespace P2 {
             GameInstance party = new(id, minTime, maxTime);
             partyList.Add(party);
         }
-        public void NotifyPartyEnd(GameInstance party) {
-            Logger.Log("Party " + party.GetId() + " has ended.", partyList, true);
+       public void NotifyPartyStart(GameInstance party) {
+            if (!verboseLog) { return; }
+            Logger.Log("Party " + party.GetId() + " has started.", partyList, logToFile);
         }
 
-        public void SetParameters(uint maxInstances, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime) {
+        public void NotifyPartyEnd(GameInstance party) {
+            if (!verboseLog) { return; }
+            Logger.Log("Party " + party.GetId() + " has ended.", partyList, logToFile);
+        }
+
+        public void SetParameters(uint maxInstances, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime, uint logToFile, uint verboseLog) {
             this.maxInstances = maxInstances;
             this.dpsCount = dpsCount;
             this.healerCount = healerCount;
@@ -87,9 +93,8 @@ namespace P2 {
             this.minTime = minTime;
             this.maxTime = maxTime;
 
-            if (this.minTime > this.maxTime) { this.minTime = this.maxTime; }
-
-            this.partySemaphore = new SemaphoreSlim((int) maxInstances);
+            if (logToFile == 1) { this.logToFile = true; }
+            if (verboseLog == 0) { this.verboseLog = false; }
         }
         public void Initialize() {
             for (uint i = 0; i < maxInstances; i++) { // Pre-generate some parties
@@ -98,8 +103,6 @@ namespace P2 {
             int nextPartyId = 0;
             Task.Run(async () => {
                 while (true) {
-                    //await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
-
                     lock (_lock) {
                         if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
                             break;
@@ -131,13 +134,12 @@ namespace P2 {
                             dpsCount -= 3;
                             healerCount--;
                             tankCount--;
-                            Task runParty = party.StartInstanceAsync(partySemaphore);
-                            Logger.Log("Party " + party.GetId() + " has started.", partyList, true);
+                            Task runParty = party.StartInstanceAsync();
                         }
                     }
                 }
                 while (partyList.FirstOrDefault(p => p.GetStatus() == Status.ACTIVE) != null) { }
-                Logger.LogEnd("All parties have ended.", partyList, true);
+                Logger.LogEnd("All parties have ended.", partyList, logToFile);
                 running = false;
             });
         }

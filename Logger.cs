@@ -21,6 +21,8 @@ namespace P2 {
     class Logger {
         private static string path = "log.txt";
         private static StreamWriter logFile;
+        private static string indentsFile = "\t\t\t\t\t\t\t\t\t";
+        private static string indentsConsole = "\t\t\t\t\t";
         private static void WriteToFile(string message) {
             try {
                 File.AppendAllTextAsync(path, message);
@@ -33,26 +35,30 @@ namespace P2 {
         public static void ResetFile() {
             string path = "log.txt";
             File.WriteAllText(path, string.Empty);
-            //logFile = new StreamWriter(path, append: true);
         }
 
         public static void Log(string update, List<GameInstance> instances, bool writeToFile = false) {
+            string indent = indentsConsole;
+            if (writeToFile) { indent = indentsFile; }
             StringBuilder sb = new();
-            sb.Append($"{PreciseTime.TimeStamp()}{update}\n\t\t\t\t\tInstances:");
+            sb.Append($"{PreciseTime.TimeStamp()}{update}\n{indent}Instances:");
             foreach (GameInstance instance in instances) {
                 sb.Append("\n");
-                sb.Append($"\t\t\t\t\tInstance {instance.GetId()}: {instance.GetStatus()}");
+                sb.Append($"{indent}Instance {instance.GetId()}: {instance.GetStatus()}");
             }
+            sb.Append("\n");
             if (writeToFile) { WriteToFile(sb.ToString()); }
             else { Console.WriteLine(sb.ToString()); }
         }
 
         public static void LogEnd(string update, List<GameInstance> instances, bool writeToFile = false) {
+            string indent = indentsConsole;
+            if (writeToFile) { indent = indentsFile; }
             StringBuilder sb = new();
-            sb.Append($"{PreciseTime.TimeStamp()}{update}\n\t\t\t\t\tInstances:");
+            sb.Append($"{PreciseTime.TimeStamp()}{update}\n{indent}Instances:");
             foreach (GameInstance instance in instances) {
                 sb.Append("\n");
-                sb.Append($"\t\t\t\t\tInstance {instance.GetId()}: Hosted {instance.GetPartiesRan()} parties for a total of {instance.GetTotalPartyTime()} seconds.");
+                sb.Append($"{indent}Instance {instance.GetId()}: Hosted {instance.GetPartiesRan()} parties for a total of {instance.GetTotalPartyTime()} seconds.");
             }
             if (writeToFile) { WriteToFile(sb.ToString()); }
             else { Console.WriteLine(sb.ToString()); }
