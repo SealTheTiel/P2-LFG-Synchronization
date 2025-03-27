@@ -20,12 +20,14 @@ namespace P2 {
     }
     class Logger {
         private static string path = "log.txt";
-        private static StreamWriter logFile;
         private static string indentsFile = "\t\t\t\t\t\t\t\t\t";
         private static string indentsConsole = "\t\t\t\t\t";
+        private static List<Task> logTasks = new();
+        public static bool isLogging = true;
         private static void WriteToFile(string message) {
             try {
-                File.AppendAllTextAsync(path, message);
+                Task task = File.AppendAllTextAsync(path, message);
+                logTasks.Add(task);
             }
             catch (Exception e) {
                 Console.WriteLine($"Error writing to file: {e.Message}");
@@ -35,6 +37,12 @@ namespace P2 {
         public static void ResetFile() {
             string path = "log.txt";
             File.WriteAllText(path, string.Empty);
+        }
+
+        public static void LogStart(bool writeToFile = false) {
+            string message = $"{PreciseTime.TimeStamp()}Program Started";
+            if (writeToFile) { WriteToFile(message); }
+            Console.WriteLine(message);
         }
 
         public static void Log(string update, List<GameInstance> instances, bool writeToFile = false) {
@@ -51,7 +59,7 @@ namespace P2 {
             else { Console.WriteLine(sb.ToString()); }
         }
 
-        public static void LogEnd(string update, List<GameInstance> instances, bool writeToFile = false) {
+        public static async Task LogEnd(string update, List<GameInstance> instances, bool writeToFile = false) {
             string indent = indentsConsole;
             if (writeToFile) { indent = indentsFile; }
             StringBuilder sb = new();
@@ -62,6 +70,12 @@ namespace P2 {
             }
             if (writeToFile) { WriteToFile(sb.ToString()); }
             else { Console.WriteLine(sb.ToString()); }
+
+            String ending = $"{PreciseTime.TimeStamp()}Program Finished";
+            if (writeToFile) { WriteToFile(ending); }
+            Console.WriteLine(ending);
+            await Task.WhenAll(logTasks);
+            isLogging = false;
         }
     }
 }

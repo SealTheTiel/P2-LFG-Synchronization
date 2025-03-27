@@ -28,7 +28,7 @@
             PartyManager pm = PartyManager.Instance;
             pm.SetParameters(maxInstances, dpsCount, healerCount, tankCount, minTime, maxTime, logToFile, verboseLog);
             pm.Initialize();
-            while (pm.running) { }
+            while (pm.running && Logger.isLogging) { }
             Task.Delay(1000).Wait();
             Console.WriteLine("Program Finished");
         }

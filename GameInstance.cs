@@ -102,6 +102,7 @@ namespace P2 {
             }
             int nextPartyId = 0;
             Task.Run(async () => {
+                Logger.LogStart(logToFile);
                 while (true) {
                     lock (_lock) {
                         if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
