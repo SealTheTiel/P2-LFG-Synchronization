@@ -19,24 +19,43 @@ namespace P2 {
         }
     }
     class Logger {
-        public static void Log(string update, List<GameInstance> instances) {
+        private static string path = "log.txt";
+        private static StreamWriter logFile;
+        private static void WriteToFile(string message) {
+            try {
+                File.AppendAllTextAsync(path, message);
+            }
+            catch (Exception e) {
+                Console.WriteLine($"Error writing to file: {e.Message}");
+            }
+        }
+
+        public static void ResetFile() {
+            string path = "log.txt";
+            File.WriteAllText(path, string.Empty);
+            //logFile = new StreamWriter(path, append: true);
+        }
+
+        public static void Log(string update, List<GameInstance> instances, bool writeToFile = false) {
             StringBuilder sb = new();
             sb.Append($"{PreciseTime.TimeStamp()}{update}\n\t\t\t\t\tInstances:");
             foreach (GameInstance instance in instances) {
                 sb.Append("\n");
                 sb.Append($"\t\t\t\t\tInstance {instance.GetId()}: {instance.GetStatus()}");
             }
-            Console.WriteLine(sb.ToString());
+            if (writeToFile) { WriteToFile(sb.ToString()); }
+            else { Console.WriteLine(sb.ToString()); }
         }
 
-        public static void LogEnd(string update, List<GameInstance> instances) {
+        public static void LogEnd(string update, List<GameInstance> instances, bool writeToFile = false) {
             StringBuilder sb = new();
             sb.Append($"{PreciseTime.TimeStamp()}{update}\n\t\t\t\t\tInstances:");
             foreach (GameInstance instance in instances) {
                 sb.Append("\n");
                 sb.Append($"\t\t\t\t\tInstance {instance.GetId()}: Hosted {instance.GetPartiesRan()} parties for a total of {instance.GetTotalPartyTime()} seconds.");
             }
-            Console.WriteLine(sb.ToString());
+            if (writeToFile) { WriteToFile(sb.ToString()); }
+            else { Console.WriteLine(sb.ToString()); }
         }
     }
 }

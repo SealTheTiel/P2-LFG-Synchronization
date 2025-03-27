@@ -76,7 +76,7 @@ namespace P2 {
             partyList.Add(party);
         }
         public void NotifyPartyEnd(GameInstance party) {
-            Logger.Log("Party " + party.GetId() + " has ended.", partyList);
+            Logger.Log("Party " + party.GetId() + " has ended.", partyList, true);
         }
 
         public void SetParameters(uint maxInstances, uint dpsCount, uint healerCount, uint tankCount, uint minTime, uint maxTime) {
@@ -110,7 +110,7 @@ namespace P2 {
                             healerCount--;
                             tankCount--;
                             Task runParty = party.StartInstanceAsync(partySemaphore);
-                            Logger.Log("Party " + party.GetId() + " has started.", partyList);
+                            Logger.Log("Party " + party.GetId() + " has started.", partyList, true);
                         }
                         else {
                             partySemaphore.Release(); // If no parties are available, release the lock
@@ -118,7 +118,7 @@ namespace P2 {
                     }
                 }
                 while (partyList.FirstOrDefault(p => p.GetStatus() == Status.ACTIVE) != null) { }
-                Logger.LogEnd("All parties have ended.", partyList);
+                Logger.LogEnd("All parties have ended.", partyList, true);
                 running = false;
             });
         }
