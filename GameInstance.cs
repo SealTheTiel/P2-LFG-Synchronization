@@ -95,25 +95,44 @@ namespace P2 {
             for (uint i = 0; i < maxInstances; i++) { // Pre-generate some parties
                 NewParty();
             }
-
+            int nextPartyId = 0;
             Task.Run(async () => {
                 while (true) {
-                    await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
+                    //await partySemaphore.WaitAsync(); // Ensures only 'maxParty' parties run concurrently
 
                     lock (_lock) {
                         if (dpsCount < 3 || healerCount < 1 || tankCount < 1) {
                             break;
                         }
-                        GameInstance? party = partyList.FirstOrDefault(p => p.GetStatus() == Status.EMPTY);
+                        int checkedCount = 0;
+                        GameInstance? party = null;
+                        for (int i = nextPartyId; i < maxInstances; i ++) {
+                            GameInstance candidate = partyList[i];
+                            if (candidate.GetStatus() == Status.EMPTY) {
+                                party = candidate;
+                                nextPartyId = i ;
+                                break;
+                            }
+                        }
+                        if (nextPartyId == maxInstances) {
+                            nextPartyId = 0;
+                        }
+                        while (checkedCount < partyList.Count) {
+                            GameInstance candidate = partyList[nextPartyId];
+                            nextPartyId = (nextPartyId + 1) % partyList.Count;
+
+                            if (candidate.GetStatus() == Status.EMPTY) {
+                                party = candidate;
+                                break;
+                            }
+                            checkedCount++;
+                        }
                         if (party != null) {
                             dpsCount -= 3;
                             healerCount--;
                             tankCount--;
                             Task runParty = party.StartInstanceAsync(partySemaphore);
                             Logger.Log("Party " + party.GetId() + " has started.", partyList, true);
-                        }
-                        else {
-                            partySemaphore.Release(); // If no parties are available, release the lock
                         }
                     }
                 }
