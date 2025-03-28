@@ -30,7 +30,7 @@
             pm.Initialize();
             while (pm.running && Logger.isLogging) { }
             Task.Delay(1000).Wait();
-            Console.WriteLine("Program Finished");
+            Console.WriteLine($"{PreciseTime.TimeStamp()}End of Program");
         }
     }
 }
