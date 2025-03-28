@@ -1,9 +1,11 @@
 ﻿namespace P2 {
     class Program {
-        public static uint GetValidUintInput(string prompt, uint min, uint max) {
+        public static uint GetValidUintInput(string prompt, string inputMessage, uint min, uint max) {
             uint result;
             while (true) {
-                Console.Write(prompt);
+                Console.WriteLine(prompt);
+                Console.WriteLine($"[{min}, {max}]\n");
+                Console.Write(inputMessage);
                 string input = Console.ReadLine();
 
                 if (uint.TryParse(input, out result) && (result <= max) && (result >= min)) { break; }
@@ -16,14 +18,14 @@
         static void Main(string[] args) {
             Logger.ResetFile();
 
-            uint maxInstances = GetValidUintInput("[Max Instances]\nMax amount of active dungeons.\n\nEnter Max Instances: ", 1, 5000);
-            uint dpsCount = GetValidUintInput("[DPS Count]\nTotal DPS players in the queue.\n\nEnter DPS Count: ", 1, int.MaxValue);
-            uint healerCount = GetValidUintInput("[Healer Count]\nTotal Healers in the queue.\n\nEnter Healer Count: ", 1, int.MaxValue);
-            uint tankCount = GetValidUintInput("[Tank Count]\nTotal Tanks in the queue.\n\nEnter Tank Count: ", 1, int.MaxValue);
-            uint minTime = GetValidUintInput("[Minimum Time]\nMinimum time to complete a dungeon.\n\nEnter Min Time: ", 0, 15);
-            uint maxTime = GetValidUintInput("[Maximum Time]\nMaximum time to complete a dungeon. Must not be less than minimum time\n\nEnter Max Time: ", minTime, 15);
-            uint logToFile = GetValidUintInput("[Log Medium]\nMedium where logs will be printed\n[0] Console (recommended for low number of instances)\n[1] File (recommended for many instances)\n\nEnter Log to File: ", 0, 1);
-            uint verboseLog = GetValidUintInput("[Verbose Logging]\nPrint logs every event\n[0] No\n[1] Yes\n\nEnter Verbose Logging: ", 0, 1);
+            uint maxInstances = GetValidUintInput("[Max Instances]\nMax amount of active dungeons.", "Enter Max Instances: ", 1, 5000);
+            uint dpsCount = GetValidUintInput("[DPS Count]\nTotal DPS players in the queue.", "Enter DPS Count: ", 1, int.MaxValue);
+            uint healerCount = GetValidUintInput("[Healer Count]\nTotal Healers in the queue.", "Enter Healer Count: ", 1, int.MaxValue);
+            uint tankCount = GetValidUintInput("[Tank Count]\nTotal Tanks in the queue.", "Enter Tank Count: ", 1, int.MaxValue);
+            uint minTime = GetValidUintInput("[Minimum Time]\nMinimum time to complete a dungeon.", "Enter Min Time: ", 0, 15);
+            uint maxTime = GetValidUintInput("[Maximum Time]\nMaximum time to complete a dungeon. Must not be less than minimum time", "Enter Max Time: ", minTime, 15);
+            uint logToFile = GetValidUintInput("[Log Medium]\nMedium where logs will be printed\n[0] Console (recommended for low number of instances)\n[1] File (recommended for many instances)", "Enter Log to File: ", 0, 1);
+            uint verboseLog = GetValidUintInput("[Verbose Logging]\nPrint logs every event\n[0] No\n[1] Yes", "Enter Verbose Logging: ", 0, 1);
 
             PartyManager pm = PartyManager.Instance;
             pm.SetParameters(maxInstances, dpsCount, healerCount, tankCount, minTime, maxTime, logToFile, verboseLog);
