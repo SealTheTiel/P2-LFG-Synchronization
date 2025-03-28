@@ -99,7 +99,7 @@ namespace P2 {
         public static async Task LogStart(bool writeToFile = false) {
             Log log = new("Simulation Started", writeToFile);
             EnqueueLog(log);
-            Console.Write(log.ToString());
+            if (writeToFile) { Console.Write(log.ToString()); }
             Task.Run(() => ProcessLogQueue());
         }
 
