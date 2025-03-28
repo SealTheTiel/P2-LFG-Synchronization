@@ -8,38 +8,48 @@ When ran, the program will require user input for setting the hypothetical serve
 
 ### Max Instances
 Max amount of active dungeons or running instances.
+
 Range is `1` to `5000`
 
 ### DPS Count
 Amount of DPS players in queue.
+
 Range is `1` to `2147483647`
 
 ### Healer Count
 Amount of Healers in queue.
+
  Range is `1` to `2147483647`
 
 
 ### Tank Count
 Amount of Tank players in queue.
+
  Range is `1` to `2147483647`
  
 ### Minimum Time
 Minimum time that the players need to complete a dungeon.
+
 Range is `0` to `15`
 
 ### Maximum Time
 Minimum time that the players need to complete a dungeon.
+
 Range is `minTime` to `15`
 
 
 ### Log Medium
 Medium where logs will be printed.
+
 `0` for the console (recommended for few `instances`)
+
 `1` for writing to a file (recommended for many `instances`)
 
 ### Verbose Logging
 Whether to log all events or only the final event
+
 `0` only log the summary
+
 `1` log all events
 
 ## Input Validation
